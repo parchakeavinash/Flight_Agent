@@ -17,3 +17,7 @@ departure = 'Mumbai'
 arrival = 'Mumbai international'
 status = 'active'
 
+✈ Emirates
+📍 Mumbai → Dubai
+🟢 Status: Active
+
