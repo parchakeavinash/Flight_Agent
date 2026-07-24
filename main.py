@@ -7,6 +7,7 @@ import json
 from typing import TypedDict, Annotated,List
 from langgraph.graph import StateGraph, START, END
 # from langgraph.checkpoint.postgres import PostgresSaver
+from app.services.flight_service import extract_flight_info
 from langchain_core.messages import(
     AnyMessage,
     HumanMessage,
@@ -19,7 +20,8 @@ from app.tools.tavily_tool import tavily_search
 from app.tools.flight_tool import flight_search
 
 from config import settings
-
+from app.utils.airport_helper import get_airport_code
+from app.schemas.travel_schema import TravelDetails
 llm = ChatGroq(
     model = "llama-3.3-70b-versatile",
     api_key=settings.GROQ_API_KEY,
@@ -29,6 +31,7 @@ llm = ChatGroq(
 class TravelState(TypedDict):
     messages: Annotated[List[AnyMessage],operator.add]
     user_query: str
+    travel_details: TravelDetails
     flight_result: str
     hotel_result: str
     itinerary: str
@@ -39,8 +42,23 @@ class TravelState(TypedDict):
 # flight agent
 
 def flight_agent(state: TravelState):
+
     query = state['user_query']
-    flight_data = flight_search(query)
+    flight_info = extract_flight_info(
+            state["user_query"]
+        )
+
+    dep_iata = get_airport_code(
+            flight_info.departure_city
+        )
+
+    arr_iata = get_airport_code(
+            flight_info.destination_city
+        )
+    flight_data = flight_search(
+        dep_iata,
+        arr_iata,
+    )
     print("\n===== Flight Tool Output =====")
     print(flight_data)
     return{

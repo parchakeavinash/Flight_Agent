@@ -1,12 +1,13 @@
 import httpx
 from config import settings
 
-def flight_search(query) ->str:
+def flight_search(query: str, dep_iata: str, arr_iata: str) ->str:
     BASE_URL = "https://api.aviationstack.com/v1/flights"
 
     params = {
         'access_key': settings.AVIATIONSTACK_API_KEY,
-        "airline_name": query,
+        "dep_iata": dep_iata,
+        "arr_iata": arr_iata,
         'limit': 5
     }
 
