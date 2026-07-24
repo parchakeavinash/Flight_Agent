@@ -3,6 +3,7 @@ import operator
 from langchain_core.prompts import prompt
 import psycopg
 import json
+from pathlib import Path
 
 from typing import TypedDict, Annotated,List
 from langgraph.graph import StateGraph, START, END
@@ -67,7 +68,7 @@ def flight_agent(state: TravelState):
     arr_iata = get_airport_code(
             details.destination_city
         )
-    flight_data = flight_search(
+    flight_data = flight_search(details,
         dep_iata,
         arr_iata,
     )
@@ -109,9 +110,10 @@ def hotel_agent(state: TravelState):
 # itinerary agent
 def itinerary_agent(state: TravelState):
     prompt = f"""
-    User Query:
-    {state["user_query"]}
-
+    Travel Details:
+    {json.dumps(state["travel_details"].model_dump(), indent=2)}
+    # {state["travel_details"]}
+    
     Flights:
     {json.dumps(state["flight_result"], indent=2)}
 
@@ -201,6 +203,23 @@ if __name__== '__main__':
 
         }
     )
+
+# its optional
+    outdir_dir = Path('output')
+    outdir_dir.mkdir(exist_ok=True)
+
+    file_path = outdir_dir / 'travel_plant.md'
+
+    with open(file_path, "w", encoding="utf-8") as file:
+        for i, msg in enumerate(result["messages"], start=1):
+            file.write(f"# Agent {i}\n\n")
+            file.write(msg.content)
+            file.write("\n\n")
+            file.write("-" * 80)
+            file.write("\n\n")
+
+    print(f"Saved to {file_path}")
+
 
     print("\n========== FINAL RESPONSE ==========\n")
 
