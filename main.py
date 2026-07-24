@@ -18,10 +18,11 @@ from langchain_groq import ChatGroq
 from app.tools.tavily_tool import tavily_search
 from app.tools.flight_tool import flight_search
 
-from config import api_key
+from config import settings
 
 llm = ChatGroq(
-    model = "llama-3.3-70b-versatile"
+    model = "llama-3.3-70b-versatile",
+    api_key=settings.GROQ_API_KEY,
 )
 
 # State
@@ -40,6 +41,8 @@ class TravelState(TypedDict):
 def flight_agent(state: TravelState):
     query = state['user_query']
     flight_data = flight_search(query)
+    print("\n===== Flight Tool Output =====")
+    print(flight_data)
     return{
         "flight_result": flight_data,
         "messages":[
@@ -105,10 +108,10 @@ def final_agenet(state:TravelState):
     Generate the final travel plan for the user.
 
     Flight Details:
-    {state["flight_results"]}
+    {state["flight_result"]}
 
     Hotel Details:
-    {state["hotel_results"]}
+    {state["hotel_result"]}
 
     Travel Itinerary:
     {state["itinerary"]}
@@ -143,14 +146,14 @@ graph.add_edge("final_agent", END)
 app = graph.compile()
 
 if __name__== '__main__':
-    user_query = input("Enter you travel request")
+    user_query = input("Enter you travel request:\n")
 
     result = app.invoke(
         {
             "messages":[HumanMessage(content=user_query)],
             "user_query": user_query,
-            "flight_results": [],
-            "hotel_results": [],
+            "flight_result": [],
+            "hotel_result": [],
             "itinerary": "",
             "llm_calls": 0,
 
