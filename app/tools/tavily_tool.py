@@ -6,23 +6,19 @@ client = TavilyClient(
     api_key =settings.TAVILY_API_KEY
 )
 
-def tavily_search(query):
+def tavily_search(query: str):
     response = client.search(
         query=query,
         max_results=5
     )
 
-    search_result = []
-    for id,result in enumerate(response['result'],1):
-        title = result.get('title', "unknown")
-        url = result.get('url','')
-        content = result.get('content','').strip()
+    results = []
 
-        if len(content) >300:
-            content = content[:300].rsplit(" ",1)[0] + "..."
-        
-        search_result.append(
-            f'{id}. **{title}**\n {url}\n {content}'
-        )
+    for result in response.get("results", []):
+        results.append({
+            "title": result.get("title", "Unknown"),
+            "url": result.get("url", ""),
+            "content": result.get("content", "").strip(),
+        })
 
-    return search_result
+    return results
