@@ -1,7 +1,6 @@
 from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
 BASE_DIR = Path(__file__).resolve().parent
 
 class Settings(BaseSettings):
@@ -15,6 +14,5 @@ class Settings(BaseSettings):
     DATABASE_URL: str
     TAVILY_API_KEY: str
     AVIATIONSTACK_API_KEY: str
-
 
 settings = Settings()
