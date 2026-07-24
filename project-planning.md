@@ -21,3 +21,60 @@ status = 'active'
 📍 Mumbai → Dubai
 🟢 Status: Active
 
+                   User Query
+                        │
+                        ▼
+               Parser Agent (LLM)
+                        │
+                        ▼
+                 TravelDetails
+                        │
+      ┌─────────────────┼─────────────────┐
+      ▼                 ▼                 ▼
+ Flight Agent      Hotel Agent     Itinerary Agent
+      │                 │                 │
+      └─────────────────┴─────────────────┘
+                        │
+                        ▼
+                  Final Response
+
+
+User Query
+      │
+      ▼
+Parser Agent
+      │
+      ▼
+TravelDetails
+      │
+      ▼
+Hotel Agent
+      │
+Build optimized search query
+      │
+      ▼
+Tavily Tool
+      │
+Search the web
+      │
+      ▼
+Hotel Results
+
+
+my Parse agnet workflow
+
+User Query
+      │
+      ▼
+Parser Agent
+      │
+extract_travel_details()   ← Only 1 LLM call
+      │
+      ▼
+TravelDetails
+      │
+ ┌────┴─────────┐
+ ▼              ▼
+Flight Agent   Hotel Agent
+ ▼              ▼
+Flight Tool    Hotel Tool

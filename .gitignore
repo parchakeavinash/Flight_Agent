@@ -10,3 +10,4 @@ wheels/
 .venv
 
 project-planning.md
+test_parser.py
