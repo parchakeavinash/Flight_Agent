@@ -7,3 +7,13 @@ along with we will use 4 specilzed AI agents:
 
 Each aI agent performs its own task and together they work as one intelligent system
 
+
+firist we will create an flight search tool using aviationstack api 
+
+in that we will store th flight record
+eg-
+airline = 'emirates'
+departure = 'Mumbai'
+arrival = 'Mumbai international'
+status = 'active'
+
