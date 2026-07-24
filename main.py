@@ -22,6 +22,8 @@ from app.tools.flight_tool import flight_search
 from config import settings
 from app.utils.airport_helper import get_airport_code
 from app.schemas.travel_schema import TravelDetails
+from app.services.travel_parser import extract_travel_details
+
 llm = ChatGroq(
     model = "llama-3.3-70b-versatile",
     api_key=settings.GROQ_API_KEY,
@@ -38,22 +40,32 @@ class TravelState(TypedDict):
     llm_calls: int
 
 #create agents
+# Parser_agent
+def parser_agent(state: TravelState):
 
+    details = extract_travel_details(
+        state["user_query"]
+    )
+
+    return {
+        "travel_details": details,
+        "llm_calls": state.get("llm_calls", 0) + 1,
+    }
 # flight agent
 
 def flight_agent(state: TravelState):
-
-    query = state['user_query']
-    flight_info = extract_flight_info(
-            state["user_query"]
-        )
+    details = state["travel_details"]
+    # query = state['user_query']
+    # flight_info = extract_flight_info(
+    #         state["user_query"]
+    #     )
 
     dep_iata = get_airport_code(
-            flight_info.departure_city
+            details.departure_city
         )
 
     arr_iata = get_airport_code(
-            flight_info.destination_city
+            details.destination_city
         )
     flight_data = flight_search(
         dep_iata,
@@ -70,20 +82,30 @@ def flight_agent(state: TravelState):
     }
 
 # hostel agent
-
+# hold
 def hotel_agent(state: TravelState):
-    query = state['user_query']
-    hostel_data = tavily_search(query)
+    details = state["travel_details"]
+    user_query = state["user_query"]
 
-    return{
-        'hotel_result': hostel_data,
-        'messages': [
-            AIMessage(content=f'Hotel information fetched..')
+    search_query = f"""
+    Find hotels in {details.destination_city}.
+
+    Budget: {details.budget if details.budget else "Not specified"}
+
+    User requirements:
+    {user_query}
+    """
+
+    hotel_data = tavily_search(search_query)
+
+    return {
+        "hotel_result": hotel_data,
+        "messages": [
+            AIMessage(content="Hotel information fetched.")
         ],
-        'llm_calls': state.get('llm_calls',0)+1
+        "llm_calls": state.get("llm_calls", 0) + 1
     }
-
-
+    
 # itinerary agent
 def itinerary_agent(state: TravelState):
     prompt = f"""
@@ -150,12 +172,14 @@ def final_agenet(state:TravelState):
 # build graph
 graph = StateGraph(TravelState)
 
+graph.add_node('parser_agent',parser_agent)
 graph.add_node('flight_agent',flight_agent)
 graph.add_node('hotel_agent',hotel_agent)
 graph.add_node('itinerary_agent',itinerary_agent)
 graph.add_node('final_agent',final_agenet)
 
-graph.add_edge(START, 'flight_agent')
+graph.add_edge(START, 'parser_agent')
+graph.add_edge('parser_agent', 'flight_agent')
 graph.add_edge('flight_agent', 'hotel_agent')
 graph.add_edge("hotel_agent", 'itinerary_agent')
 graph.add_edge("itinerary_agent", 'final_agent')
