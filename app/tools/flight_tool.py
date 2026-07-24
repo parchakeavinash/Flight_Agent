@@ -1,34 +1,52 @@
-import requests
-from config import api_key
+import httpx
+from config import settings
 
 def flight_search(query) ->str:
-    url  = "https://api.aviationstack.com/v1/flights"
+    BASE_URL = "https://api.aviationstack.com/v1/flights"
 
     params = {
-        'access_key': api_key.AVIATIONSTACK_API_KEY,
+        'access_key': settings.AVIATIONSTACK_API_KEY,
+        "airline_name": query,
         'limit': 5
     }
 
-    response = requests.get(url,params=params)
-    response.raise_for_status()
+    try:
+        with httpx.Client(timeout=10) as client:
+            response = client.get(BASE_URL, params=params)
 
-    flights = response.json()['data']
+        response.raise_for_status()
 
-    saved_flight = []
+    except httpx.HTTPStatusError as e:
+        return [{
+            "error": f"API returned {e.response.status_code}: {e.response.text}"
+        }]
+
+    except httpx.RequestError as e:
+        return [{
+            "error": f"Request failed: {e}"
+        }]
+
+    flights = response.json().get("data", [])
+
+    if not flights:
+        return [{
+            "message": "No flights found."
+        }]
+
+    results = []
 
     for flight in flights:
+
         airline = flight.get("airline", {}).get("name", "Unknown")
         departure = flight.get("departure", {}).get("airport", "Unknown")
         arrival = flight.get("arrival", {}).get("airport", "Unknown")
         status = flight.get("flight_status", "Unknown")
 
-    saved_flight.append({
-        "airline": airline,
-        "departure": departure,
-        "arrival": arrival,
-        "status": status,
-    })
+        results.append({
+            "airline": airline,
+            "departure": departure,
+            "arrival": arrival,
+            "status": status,
+        })
 
-    return saved_flight
-
-   
+    return results

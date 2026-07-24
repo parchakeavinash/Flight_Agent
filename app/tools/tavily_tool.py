@@ -1,9 +1,9 @@
 from tavily import TavilyClient
-from config import api_key
+from config import settings
 
 
 client = TavilyClient(
-    api_key =api_key.TAVILY_API_KEY
+    api_key =settings.TAVILY_API_KEY
 )
 
 def tavily_search(query):

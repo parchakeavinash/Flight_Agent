@@ -1,18 +1,18 @@
 from pathlib import Path
-from dotenv import load_dotenv
-import os
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-load_dotenv(BASE_DIR / ".env")
+class Settings(BaseSettings):
 
-class Config:
-    GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-    TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
-    AVIATIONSTACK_API_KEY = os.getenv("AVIATIONSTACK_API_KEY")
+    model_config = SettingsConfigDict(
+        env_file=BASE_DIR / ".env",
+        extra="ignore",
+    )
 
-    DATABASE_URL = os.getenv("DATABASE_URL")
-    SECRET_KEY = os.getenv("SECRET_KEY")
+    GROQ_API_KEY: str
+    DATABASE_URL: str
+    TAVILY_API_KEY: str
+    AVIATIONSTACK_API_KEY: str
 
-api_key = Config()
-
+settings = Settings()

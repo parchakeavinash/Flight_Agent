@@ -1,10 +1,25 @@
-import os
+# import os
+# import operator
+# import psycopg
 
-from dotenv import load_dotenv
-from pathlib import Path
 
+# from typing import TypedDict, Annotated
+# from langgraph.graph import StateGraph, START, END
+# from langgraph.checkpoint.postgres import PostgresSaver
+# from langchain_core.messages import(
+#     AnyMessage,
+#     HumanMessage,
+#     AIMessage,
+#     SystemMessage
+# )
+# from langchain_groq import ChatGroq
 
-Script_path = Path(__file__).resolve().parent
-env_path = Script_path / '.env'
+# from app.tools.tavily_tool import tavily_search
+# from app.tools.flight_tool import flight_search
 
-load_dotenv(env_path)
+# from config import api_key
+
+# llm = ChatGroq(
+#     model = "llama-3.3-70b-versatile"
+# )
+
